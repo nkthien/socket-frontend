@@ -1,7 +1,7 @@
 import React, {Component} from 'react';
 import { Link } from 'react-router-dom'
 
-class Login extends Component {
+class Register extends Component {
     constructor(props) {
         super(props);
         this.initialState = {
@@ -18,8 +18,7 @@ class Login extends Component {
     }
     handleSubmit = () => {
         const {username, password} = this.state;
-        const socket = this.props.socket;  
-        console.log(socket)
+        const {socket} = this.props;  
         var msg = {  
             method: "GET",  
             url: "API/login",
@@ -32,15 +31,14 @@ class Login extends Component {
         socket.send(JSON.stringify(msg))
         socket.onmessage = function(event) {
             var message = event.data;
-            sessionStorage.setItem('authentication', event.data);
-            console.log(message);
+            console.log("Hello your account has been created!");
         };
     }
     render() {
         const {username, password} = this.state;
         return (
             <div>
-                <h1>Login</h1>
+                <h1>Register</h1>
                 <form>
                     <label>Username</label>
                     <input 
@@ -59,9 +57,9 @@ class Login extends Component {
                         value="Submit" 
                         onClick={this.handleSubmit} />
                 </form>
-                <Link to='/register'>Don't have account? Create one!</Link>
+                <Link to='/login'>Back to login!</Link>
             </div>
         )
     }
 }
-export default Login;
+export default Register;
