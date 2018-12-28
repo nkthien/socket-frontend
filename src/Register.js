@@ -20,8 +20,8 @@ class Register extends Component {
         const {username, password} = this.state;
         const {socket} = this.props;  
         var msg = {  
-            method: "GET",  
-            url: "API/login",
+            method: "POST",  
+            url: "API/register",
             authorization: "",  
             data: {
                 username: username,
