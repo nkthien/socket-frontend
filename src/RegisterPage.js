@@ -1,5 +1,5 @@
 import React, {Component} from 'react';
-import { Link } from 'react-router-dom'
+import {Link, withRouter} from 'react-router-dom';
 
 class Register extends Component {
     constructor(props) {
@@ -18,7 +18,8 @@ class Register extends Component {
     }
     handleSubmit = () => {
         const {username, password} = this.state;
-        const {socket} = this.props;  
+        const socket = this.props.socket;  
+        const history = this.props.history;
         var msg = {  
             method: "POST",  
             url: "API/register",
@@ -32,6 +33,8 @@ class Register extends Component {
         socket.onmessage = function(event) {
             var message = event.data;
             console.log("Hello your account has been created!");
+            sessionStorage.setItem('authentication', event.data);
+            history.push("/");
         };
     }
     render() {
@@ -62,4 +65,4 @@ class Register extends Component {
         );
     }
 }
-export default Register;
+export default withRouter(Register);

@@ -1,5 +1,5 @@
 import React, {Component} from 'react';
-import { Link } from 'react-router-dom'
+import {Link, withRouter} from 'react-router-dom';
 
 class Login extends Component {
     constructor(props) {
@@ -19,6 +19,7 @@ class Login extends Component {
     handleSubmit = () => {
         const {username, password} = this.state;
         const socket = this.props.socket;  
+        const history = this.props.history;
         console.log(socket)
         var msg = {  
             method: "GET",  
@@ -32,8 +33,10 @@ class Login extends Component {
         socket.send(JSON.stringify(msg))
         socket.onmessage = function(event) {
             var message = event.data;
+            //(if message .....)
             sessionStorage.setItem('authentication', event.data);
             console.log(message);
+            history.push("/");
         };
     }
     render() {
@@ -64,4 +67,4 @@ class Login extends Component {
         );
     }
 }
-export default Login;
+export default withRouter(Login);
