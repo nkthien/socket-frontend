@@ -59,7 +59,7 @@ class Register extends Component {
                 </form>
                 <Link to='/login'>Back to login!</Link>
             </div>
-        )
+        );
     }
 }
 export default Register;

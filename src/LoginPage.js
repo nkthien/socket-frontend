@@ -61,7 +61,7 @@ class Login extends Component {
                 </form>
                 <Link to='/register'>Don't have account? Create one!</Link>
             </div>
-        )
+        );
     }
 }
 export default Login;
