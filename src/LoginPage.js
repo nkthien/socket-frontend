@@ -9,6 +9,11 @@ class Login extends Component {
             password: ''
         };
         this.state = this.initialState;
+        this.state.socket = props.socket;
+        console.log("constructor run");
+        this.state.socket.onmessage = (e) => {
+            console.log("thiss did run")
+        };
     }
     handleChange = event => {
         const {name, value} = event.target;
@@ -20,7 +25,7 @@ class Login extends Component {
         const {username, password} = this.state;
         const socket = this.props.socket;  
         const history = this.props.history;
-        console.log(socket)
+        //console.log(socket)
         var msg = {  
             method: "GET",  
             url: "API/login",
@@ -35,7 +40,7 @@ class Login extends Component {
             var message = event.data;
             //(if message .....)
             sessionStorage.setItem('authentication', event.data);
-            console.log(message);
+            //console.log(message);
             history.push("/");
         };
     }

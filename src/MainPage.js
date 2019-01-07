@@ -8,7 +8,7 @@ const ChatBox = props => {
                     {
                         props.messageData.map((messageItem, i) => {
                             return (
-                                <div className="ui comments">
+                                <div className="ui comments" key={i}>
                                   <div className="comment">
                                     <a className="avatar">
                                       <img src="https://api.adorable.io/avatars/285/invoker"></img>
@@ -44,14 +44,14 @@ const FriendsList = props => {
             {
                 props.knownFriends.map((friendItem, i) => {
                     return (
-                        <div class="item">
-                          <div class="right floated content">
-                            {friendItem.isOnline && <div class="dot"></div>}
+                        <div className="item" key={i}>
+                          <div className="right floated content">
+                            {friendItem.isOnline && <div className="dot"></div>}
                           </div>
-                          <img class="ui avatar image" src="https://api.adorable.io/avatars/285/asiojdioasd" />
-                          <div class="content">
-                            <a class="header">{friendItem.name}</a>
-                            <div class="description">{friendItem.pastMessage}</div>
+                          <img className="ui avatar image" src="https://api.adorable.io/avatars/285/asiojdioasd" />
+                          <div className="content">
+                            <a className="header">{friendItem.name}</a>
+                            <div className="description">{friendItem.pastMessage}</div>
                           </div>
                         </div>
                     )
@@ -59,17 +59,17 @@ const FriendsList = props => {
             }
         </div>
         <h3>People you may know</h3>
-        <div class="ui middle aligned list">
+        <div className="ui middle aligned list">
             {
                 props.potentialFriends.map((friendItem, i) => {
                     return (
-                        <div class="item">
-                          <div class="right floated content">
-                            <div class="ui button">Add</div>
+                        <div className="item" key={i}>
+                          <div className="right floated content">
+                            <div className="ui button">Add</div>
                           </div>
-                          <img class="ui avatar image" src="https://api.adorable.io/avatars/285/asiojdioasd" />
-                          <div class="content">
-                            <a class="header">{friendItem.name}</a>
+                          <img className="ui avatar image" src="https://api.adorable.io/avatars/285/asiojdioasd" />
+                          <div className="content">
+                            <a className="header">{friendItem.name}</a>
                           </div>
                         </div>
                     )
