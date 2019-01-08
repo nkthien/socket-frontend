@@ -80,6 +80,42 @@ const FriendsList = props => {
     )
 }
 
+const NewsFeed = props => {
+    return (
+      <div className="ui segment">
+        <div className="ui feed">
+        {
+            props.feedData.map((feedItem, i) => {
+                return (
+                  <div className="event" key={i}>
+                    <div className="label">
+                      <img src="https://api.adorable.io/avatars/285/aasdioasd" />
+                    </div>
+                    <div className="content">
+                      <div className="summary">
+                        <a>{feedItem.name}</a> posted on his page
+                        <div className="date">
+                          3 days ago
+                        </div>
+                      </div>
+                      <div className="extra text">
+                        {feedItem.message}
+                      </div>
+                      <div className="meta">
+                        <a className="like">
+                          <i className="like icon"></i> 5 Likes
+                        </a>
+                      </div>
+                    </div>
+                  </div>
+                )
+            })
+        }
+        </div>
+      </div>
+    )
+}
+
 class MainPage extends Component {
     state = {
         messageData: [
@@ -119,7 +155,19 @@ class MainPage extends Component {
                 name: "Huskar",
                 avatar: "",
             },
-        ],   
+        ],
+        feedData: [
+            {
+                name: "Ursa",
+                avatar: "",
+                message: "Ours is a life of constant reruns. We're always circling back to where we'd we started, then starting all over again. Even if we don't run extra laps that day, we surely will come back for more of the same another day soon.",
+            },
+            {
+                name: "Monkey King",
+                avatar: "",
+                message: "After Supper the Master dismissed all except Sun Wukong, Zhu Bajie and Sha the Monk. He took them out with him and said, \"Look at that wonderful moolight. It makes me long for the time when I can return home.",
+            },
+        ],
     };
     render() {
         return (
@@ -137,7 +185,9 @@ class MainPage extends Component {
                     />
                 </div>
                 <div className="six wide column">
-                    <h1>News feed</h1>
+                    <NewsFeed 
+                        feedData={this.state.feedData}
+                    />
                 </div>
             </div>   
         );
