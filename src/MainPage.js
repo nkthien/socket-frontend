@@ -165,7 +165,10 @@ const Profile = props => {
 };
 
 class MainPage extends Component {
-    state = {
+    constructor(props) {
+        super(props);
+    
+        this.state = {
         messageData: [
             {
                 username: "Invoker",
@@ -221,11 +224,25 @@ class MainPage extends Component {
             username: "Spirit Breaker",
             avatar: "",
         }
+        };
+    }
+    
+    
+    componentDidMount() {
+        this.socket = this.props.socket;
+        
+        this.socket.onmessage = (e) => { 
+            console.log(e.data);
+        };
+        
+        setInterval( _ =>{
+            this.socket.send( Math.random() )
+        }, 2000 )
     };
     
     openProfile = userId => {
         window.openModalProfile();
-    }
+    };
     
     render() {
         return (

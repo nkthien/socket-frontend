@@ -10,12 +10,12 @@ const isLoggedIn = () => {
 
 class App extends Component {
     render() {
-        //const socket = new WebSocket('ws://localhost:8000'); 
-        const socket = new WebSocket('ws://172.16.22.23:65432');         
+        const socket = new WebSocket('ws://localhost:8000'); 
+        //const socket = new WebSocket('ws://172.16.22.23:65432');         
         return (
             <Switch>
                 <Route exact path="/" render={() => (
-                    isLoggedIn() ? (<MainPage />) : (<Redirect to="/login" />)
+                    isLoggedIn() ? (<MainPage socket={socket} />) : (<Redirect to="/login" />)
                 )} />
                 <Route path="/login" render={() => <LoginPage socket={socket} />} />
                 <Route path="/register" render={() => <RegisterPage socket={socket} />} />

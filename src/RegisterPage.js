@@ -32,7 +32,7 @@ class Register extends Component {
         }; 
         socket.send(JSON.stringify(msg));
         socket.onmessage = function(event) {
-            var message = event.data;
+            //var message = event.data;
             console.log(event.data);
             sessionStorage.setItem('authentication', event.data);
             history.push("/");
