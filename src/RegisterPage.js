@@ -19,22 +19,24 @@ class Register extends Component {
     handleSubmit = () => {
         const {username, password} = this.state;
         const socket = this.props.socket;  
+        console.log(socket);
         const history = this.props.history;
         var msg = {  
-            method: "POST",  
-            url: "API/register",
-            authorization: "",  
-            data: {
+            Method: "POST",  
+            URL: "users/signup",
+            DATA: {
                 username: username,
-                password: password
+                password: password,
+                dateofbirth: 12
             }  
         }; 
-        socket.send(JSON.stringify(msg))
+        socket.send(JSON.stringify(msg));
         socket.onmessage = function(event) {
             var message = event.data;
-            console.log("Hello your account has been created!");
+            console.log(event.data);
             sessionStorage.setItem('authentication', event.data);
             history.push("/");
+            console.log(socket);
         };
     }
     render() {

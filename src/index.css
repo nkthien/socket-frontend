@@ -16,8 +16,24 @@ code {
 .dot {
   height: 6px;
   width: 6px;
-  background-color: SpringGreen;
+  background-color: rgb(66, 183, 42);
   border-radius: 50%;
   display: inline-block;
   vertical-align: middle;
+}
+
+#inputChatBox {
+    width: 100%;
+    margin-top: 1rem;
+}
+
+#inputFriendsList {
+    width: 100%;
+}
+
+#hiddenSubmit {
+    position: absolute;
+    left: -9999px;
+    width: 1px;
+    height: 1px;
 }

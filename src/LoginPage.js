@@ -27,10 +27,9 @@ class Login extends Component {
         const history = this.props.history;
         //console.log(socket)
         var msg = {  
-            method: "GET",  
-            url: "API/login",
-            authorization: "",  
-            data: {
+            Method: "POST",  
+            URL: "users/login",
+            DATA: {
                 username: username,
                 password: password
             }  
@@ -39,6 +38,7 @@ class Login extends Component {
         socket.onmessage = function(event) {
             var message = event.data;
             //(if message .....)
+            console.log(event.data);
             sessionStorage.setItem('authentication', event.data);
             //console.log(message);
             history.push("/");
