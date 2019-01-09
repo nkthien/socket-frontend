@@ -9,9 +9,18 @@ const isLoggedIn = () => {
 };
 
 class App extends Component {
+    constructor(props) {
+        super(props);
+        this.state = {
+            socket: new WebSocket('ws://172.16.22.23:65432'),
+            //socket: new WebSocket('ws://localhost:8000'),
+        };
+        console.log("runasdsadsa");
+    }
+    
     render() {
-        const socket = new WebSocket('ws://localhost:8000'); 
-        //const socket = new WebSocket('ws://172.16.22.23:65432');         
+        const socket = this.state.socket; 
+        console.log(socket);
         return (
             <Switch>
                 <Route exact path="/" render={() => (

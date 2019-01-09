@@ -51,12 +51,11 @@ const FriendsList = props => {
                     return (
                         <div className="item" key={i}>
                           <div className="right floated content">
-                            {friendItem.isOnline && <div className="dot"></div>}
+                            {friendItem.isOnline == 1 && <div className="dot"></div>}
                           </div>
                           <img className="ui avatar image" src="https://api.adorable.io/avatars/285/asiojdioasd" />
                           <div className="content">
                             <a className="header">{friendItem.username}</a>
-                            <div className="description">{friendItem.pastMessage}</div>
                           </div>
                         </div>
                     )
@@ -66,11 +65,25 @@ const FriendsList = props => {
         <h3>People you may know</h3>
         <div className="ui middle aligned list">
             {
+                props.requestedFriends.map((friendItem, i) => {
+                    return (
+                        <div className="item" key={i}>
+                          <div className="right floated content">
+                            <button className="ui positive basic button" onClick={() => props.handleAccept(friendItem.username)}>Accept</button>
+                          </div>
+                          <img className="ui avatar image" src="https://api.adorable.io/avatars/285/asiojdioasd" />
+                          <div className="content">
+                            <a className="header">{friendItem.username}</a>
+                          </div>
+                        </div>
+                    )
+                })
+            }{
                 props.potentialFriends.map((friendItem, i) => {
                     return (
                         <div className="item" key={i}>
                           <div className="right floated content">
-                            <div className="ui button">Add</div>
+                            <button className="ui basic button" onClick={() => props.handleRequest(friendItem.username)}> <i className="icon user" />Add</button>
                           </div>
                           <img className="ui avatar image" src="https://api.adorable.io/avatars/285/asiojdioasd" />
                           <div className="content">
@@ -136,28 +149,28 @@ const NewsFeed = props => {
 
 const Profile = props => {
     return (
-        <div class="ui modal">
-          <i class="close icon"></i>
-          <div class="header">
+        <div className="ui modal">
+          <i className="close icon"></i>
+          <div className="header">
             Profile Picture
           </div>
-          <div class="image content">
-            <div class="ui medium image">
+          <div className="image content">
+            <div className="ui medium image">
               <img src={"https://api.adorable.io/avatars/285/" + props.user.username} />
             </div>
-            <div class="description">
-              <div class="ui header">We've auto-chosen a profile image for you.</div>
+            <div className="description">
+              <div className="ui header">We've auto-chosen a profile image for you.</div>
               <p>We've grabbed the following image from the <a href="https://www.gravatar.com" target="_blank">gravatar</a> image associated with your registered e-mail address.</p>
               <p>Is it okay to use this photo?</p>
             </div>
           </div>
-          <div class="actions">
-            <div class="ui black deny button">
+          <div className="actions">
+            <div className="ui black deny button">
               Nope
             </div>
-            <div class="ui positive right labeled icon button">
+            <div className="ui positive right labeled icon button">
               Yep, that's me
-              <i class="checkmark icon"></i>
+              <i className="checkmark icon"></i>
             </div>
           </div>
         </div>
@@ -169,79 +182,214 @@ class MainPage extends Component {
         super(props);
     
         this.state = {
-        messageData: [
-            {
-                username: "Invoker",
-                avatar: "https://api.adorable.io/avatars/285/Invoker",
-                date: "123:123 AM",
-                message: "this is a test",
-            },
-            {
-                username: "Invoker",
-                avatar: "https://api.adorable.io/avatars/285/Invoker",
-                date: "123:123 AM",
-                message: "this is the second test",
-            },
-        ],
-        isTyping: true,
-        knownFriends: [
-            {
-                username: "Windrunner",
+            messageData: [
+                {
+                    username: "Invoker",
+                    avatar: "https://api.adorable.io/avatars/285/Invoker",
+                    date: "123:123 AM",
+                    message: "this is a test",
+                },
+                {
+                    username: "Invoker",
+                    avatar: "https://api.adorable.io/avatars/285/Invoker",
+                    date: "123:123 AM",
+                    message: "this is the second test",
+                },
+            ],
+            isTyping: true,
+            knownFriends: [
+                {
+                    username: "Windrunner",
+                    avatar: "",
+                    isOnline: true,
+                    pastMessage: "A wind of change is blowing.",
+                },
+                {
+                    username: "Crystal Maiden",
+                    avatar: "",
+                    isOnline: false,
+                    pastMessage: "Who calls the Crystal Maiden?",
+                },
+            ],
+            potentialFriends: [
+                {
+                    username: "Troll Warlord",
+                    avatar: "",
+                },
+                {
+                    username: "Huskar",
+                    avatar: "",
+                },
+            ],
+            requestedFriends: [
+                {
+                    username: "Bristle back",
+                    avatar: "",
+                },
+                {
+                    username: "Sniper",
+                    avatar: "",
+                },
+            ],
+            feedData: [
+                {
+                    username: "Ursa",
+                    avatar: "",
+                    message: "Ours is a life of constant reruns. We're always circling back to where we'd we started, then starting all over again. Even if we don't run extra laps that day, we surely will come back for more of the same another day soon.",
+                },
+                {
+                    username: "Monkey King",
+                    avatar: "",
+                    message: "After Supper the Master dismissed all except Sun Wukong, Zhu Bajie and Sha the Monk. He took them out with him and said, \"Look at that wonderful moolight. It makes me long for the time when I can return home.",
+                },
+            ],
+            user: {
+                username: "Spirit Breaker",
                 avatar: "",
-                isOnline: true,
-                pastMessage: "A wind of change is blowing.",
             },
-            {
-                username: "Crystal Maiden",
-                avatar: "",
-                isOnline: false,
-                pastMessage: "Who calls the Crystal Maiden?",
-            },
-        ],
-        potentialFriends: [
-            {
-                username: "Troll Warlord",
-                avatar: "",
-            },
-            {
-                username: "Huskar",
-                avatar: "",
-            },
-        ],
-        feedData: [
-            {
-                username: "Ursa",
-                avatar: "",
-                message: "Ours is a life of constant reruns. We're always circling back to where we'd we started, then starting all over again. Even if we don't run extra laps that day, we surely will come back for more of the same another day soon.",
-            },
-            {
-                username: "Monkey King",
-                avatar: "",
-                message: "After Supper the Master dismissed all except Sun Wukong, Zhu Bajie and Sha the Monk. He took them out with him and said, \"Look at that wonderful moolight. It makes me long for the time when I can return home.",
-            },
-        ],
-        user: {
-            username: "Spirit Breaker",
-            avatar: "",
-        }
+            modalData: {
+                username: "Lina",
+                avatar: ""
+            }
         };
     }
-    
     
     componentDidMount() {
         this.socket = this.props.socket;
         
+        var msgKnownFriends = {  
+            Method: "GET",  
+            URL: "friend",
+            Authorization: sessionStorage.getItem('authentication'),
+        }; 
+        this.socket.send(JSON.stringify(msgKnownFriends))
+        
+        
+        
+        
+        var msgPotentialFriends = {  
+            Method: "GET",  
+            URL: "friend?isrequested=1",
+            Authorization: sessionStorage.getItem('authentication'),
+        }; 
+        console.log(msgPotentialFriends);
+        this.socket.send(JSON.stringify(msgPotentialFriends))
+        
+        
+        
+        
+        
+        var msgRequestedFriends = {  
+            Method: "GET",  
+            URL: "friend?isrequested=2",
+            Authorization: sessionStorage.getItem('authentication'),
+        }; 
+        console.log(msgRequestedFriends);
+        this.socket.send(JSON.stringify(msgRequestedFriends))
+        
+        
+        
+        
+        
+        
+        var findIndex = (array, attr, value) => {
+            console.log(array);
+            console.log("value: " + value);
+            for(var i = 0; i < array.length; i += 1) {
+                console.log("item: " + array[i].username); 
+                if(array[i].username == value) {
+                    return i;
+                }
+            }
+            return -1;
+        }
+        var test = findIndex(this.state.requestedFriends, "username", "vinhloc2");
+        console.log("test: " + test);
         this.socket.onmessage = (e) => { 
             console.log(e.data);
-        };
-        
-        setInterval( _ =>{
-            this.socket.send( Math.random() )
-        }, 2000 )
+            let objs = JSON.parse(e.data);
+            console.log(objs);
+            // get friend list
+            if(objs.status === 200 && objs.method === 'GET' && objs.url === 'friend') { 
+                this.setState({
+                  knownFriends: [...this.state.knownFriends, ...objs.data]  
+                });
+            }
+            // get unknown people
+            else if(objs.status === 200 && objs.method === 'GET' && objs.url === 'friend?isrequested=2') {
+                this.setState({
+                  potentialFriends: [...this.state.potentialFriends, ...objs.data]  
+                });
+                console.log("unknown: " + this.state.potentialFriends);
+            }
+            // get requested people
+            else if(objs.status === 200 && objs.method === 'GET' && objs.url === 'friend?isrequested=1') {
+                this.setState({
+                  requestedFriends: [...this.state.requestedFriends, ...objs.data]  
+                });
+                console.log("requested: " + this.state.requestedFriends);
+            }
+            // accept requested friend
+            else if(objs.status === 200 && objs.method === 'POST' && objs.url === 'friend/accept') {
+                var arrayRequested = [...this.state.requestedFriends]; 
+                console.log(arrayRequested);
+                var index = findIndex(arrayRequested, "username", objs.data.username);
+                console.log(index);
+                if (index !== -1) {
+                    var user = arrayRequested[index];
+                    arrayRequested.splice(index, 1);
+                    user.isOnline = objs.data.isOnline;
+                    
+                    var arrayFriend = [...this.state.knownFriends]; 
+                    arrayFriend.push(user);
+                    this.setState({requestedFriends: arrayRequested, knownFriends: arrayFriend});
+                }   
+            }
+            else if(objs.status === 200 && objs.method === 'POST' && objs.url === 'friend/add') {
+                var arrayPotential = [...this.state.potentialFriends]; 
+                console.log(arrayPotential);
+                var index = findIndex(arrayPotential, "username", objs.data.username);
+                console.log(index);
+                if (index !== -1) {
+                    var user = arrayPotential[index];
+                    arrayPotential.splice(index, 1);
+                    
+                    var arrayRequested = [...this.state.requestedFriends]; 
+                    arrayRequested.push(user);
+                    this.setState({potentialFriends: arrayPotential, requestedFriends: arrayRequested});
+                }   
+            }
+        };  
     };
     
     openProfile = userId => {
         window.openModalProfile();
+    };
+    
+    handleAccept = target => {
+        var msgAccept = {  
+            Method: "POST",  
+            URL: "friend/accept",
+            Authorization: sessionStorage.getItem('authentication'),
+            DATA: {
+                username: target,
+            }
+        }; 
+        console.log(msgAccept);
+        this.socket.send(JSON.stringify(msgAccept))
+    };
+    
+    handleRequest = target => {
+        var msgAccept = {  
+            Method: "POST",  
+            URL: "friend/add",
+            Authorization: sessionStorage.getItem('authentication'),
+            DATA: {
+                username: target,
+            }
+        }; 
+        console.log(msgAccept);
+        this.socket.send(JSON.stringify(msgAccept))
     };
     
     render() {
@@ -251,6 +399,9 @@ class MainPage extends Component {
                     <FriendsList
                         knownFriends={this.state.knownFriends}
                         potentialFriends={this.state.potentialFriends}
+                        requestedFriends={this.state.requestedFriends}
+                        handleAccept={this.handleAccept}
+                        handleRequest={this.handleRequest}
                     />
                 </div>
                 <div className="six wide column">          

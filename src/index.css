@@ -20,6 +20,7 @@ code {
   border-radius: 50%;
   display: inline-block;
   vertical-align: middle;
+  margin: 13px;
 }
 
 #inputChatBox {
@@ -29,11 +30,4 @@ code {
 
 #inputFriendsList {
     width: 100%;
-}
-
-#hiddenSubmit {
-    position: absolute;
-    left: -9999px;
-    width: 1px;
-    height: 1px;
 }

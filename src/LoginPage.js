@@ -25,21 +25,24 @@ class Login extends Component {
         const {username, password} = this.state;
         const socket = this.props.socket;  
         const history = this.props.history;
-        //console.log(socket)
+        console.log(socket)
         var msg = {  
             Method: "POST",  
             URL: "users/login",
             DATA: {
-                username: username,
-                password: password
+                username: "vinhloc",
+                password: "123456789"
             }  
         }; 
         socket.send(JSON.stringify(msg))
         socket.onmessage = function(event) {
             var message = event.data;
+            console.log(message)
+            console.log("RUN")
+            var obj = JSON.parse(message);
             //(if message .....)
-            console.log(event.data);
-            sessionStorage.setItem('authentication', event.data);
+            console.log("token: " + obj.data);
+            sessionStorage.setItem('authentication', obj.data);
             //console.log(message);
             history.push("/");
         };
