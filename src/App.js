@@ -12,7 +12,7 @@ class App extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            socket: new WebSocket('ws://172.16.7.186:65432'),
+            socket: new WebSocket('ws://10.10.232.173:65432'),
             //socket: new WebSocket('ws://localhost:8000'),
             user: {},
         };

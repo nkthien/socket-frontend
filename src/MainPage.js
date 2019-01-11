@@ -264,7 +264,7 @@ class MainPage extends Component {
         this.socket = this.props.socket;
         
         // api get list friends
-        var msgKnownFriends = {  
+        let msgKnownFriends = {  
             Method: "GET",  
             URL: "friend",
             Authorization: sessionStorage.getItem('authentication'),
@@ -274,7 +274,7 @@ class MainPage extends Component {
         
         
         // api get list strangers
-        var msgPotentialFriends = {  
+        let msgPotentialFriends = {  
             Method: "GET",  
             URL: "friend?isrequested=1",
             Authorization: sessionStorage.getItem('authentication'),
@@ -285,7 +285,7 @@ class MainPage extends Component {
         
         
         // api get list request
-        var msgRequestedFriends = {  
+        let msgRequestedFriends = {  
             Method: "GET",  
             URL: "friend?isrequested=2",
             Authorization: sessionStorage.getItem('authentication'),
@@ -381,30 +381,33 @@ class MainPage extends Component {
             }
             // receive message
             else if(obj.status === 200 && obj.method === 'POST' && obj.url === 'chat/receive') {
-                console.log("nhan dc roi")
-                console.log(obj.data)
                 let data = obj.data;
                 let tmpAvatar = data.avatar ? data.avatar : ("https://api.adorable.io/avatars/285/" + data.username);
                 let msg = {
                     username: data.username,
                     message: data.content,
-                    date: data.date,
+                    date: convertTimestampToDate(data.date),
                     avatar:tmpAvatar,
                 }
                 this.setState({messageData: [...this.state.messageData, msg]});   
             }
+            // is typing notify
+            else if(obj.status === 200 && obj.method === 'POST' && obj.url === 'chat/istyping') {
+                console.log("typing bla bla bla");
+                console.log(obj.data);
+                let data = obj.data;
+                this.setState({isTyping: data.type});
+            }
         };  
-        
-        
     };
-    
+  
     openProfile = userId => {
         window.openModalProfile();
     };
     
     handleAccept = target => {
         // api post accept friend
-        var msgAccept = {  
+        let msgAccept = {  
             Method: "POST",  
             URL: "friend/accept",
             Authorization: sessionStorage.getItem('authentication'),
@@ -412,12 +415,12 @@ class MainPage extends Component {
                 id: target,
             }
         }; 
-        this.socket.send(JSON.stringify(msgAccept))
+        this.socket.send(JSON.stringify(msgAccept));
     };
     
     handleRequest = target => {
         // api post request add friend
-        var msgAccept = {  
+        let msgAccept = {  
             Method: "POST",  
             URL: "friend/add",
             Authorization: sessionStorage.getItem('authentication'),
@@ -425,12 +428,12 @@ class MainPage extends Component {
                 id: target,
             }
         }; 
-        this.socket.send(JSON.stringify(msgAccept))
+        this.socket.send(JSON.stringify(msgAccept));
     };
     
     initChatBox = friend => {
         // api fetch messages
-        var msgAccept = {  
+        let msgAccept = {  
             Method: "GET",  
             URL: "chat/" + friend.id,
             Authorization: sessionStorage.getItem('authentication'),
@@ -449,8 +452,8 @@ class MainPage extends Component {
     flagIsTyping = false;
     // send message
     handleKeyPress = (e) => {
-        if(e.key === "Enter") {
-            var msgAccept = {  
+        if(e.key === "Enter" && this.state.inputMessage !== "") {
+            let msgAccept = {  
                 Method: "POST",  
                 URL: "chat/send",
                 Authorization: sessionStorage.getItem('authentication'),
@@ -461,41 +464,47 @@ class MainPage extends Component {
                     date: getCurrentTimestamp(),
                 }
             }; 
-            console.log(JSON.stringify(msgAccept));
+            let tmpUser = this.state.user;
+            let tmpAvatar = tmpUser.avatar ? tmpUser.avatar : ("https://api.adorable.io/avatars/285/" + tmpUser.username);
+            let msg = {
+                username: tmpUser.username,
+                avatar: tmpAvatar,
+                date: convertTimestampToDate(getCurrentTimestamp()),
+                message: this.state.inputMessage,
+            }
             this.socket.send(JSON.stringify(msgAccept));
-            this.setState({inputMessage: ""});
+            this.setState({inputMessage: "", messageData: [...this.state.messageData, msg]});
+            this.sendStopTyping();
         }
-        /*
-        if(flagIsTyping) {
-            var msgAccept = {  
+        if(!this.state.flagIsTyping && this.state.inputMessage !== "") {
+            let msgAccept = {  
                 Method: "POST",  
-                URL: "chat/send",
+                URL: "chat/istyping",
                 Authorization: sessionStorage.getItem('authentication'),
                 DATA: {
-                    id: this.state.user.id,
-                    username: this.state.user.username,
-                    content: this.state.inputMessage,
-                    date: getCurrentTimestamp(),
+                    username: this.state.textingFriend.username,
+                    type: true,
                 }
             }; 
             console.log(JSON.stringify(msgAccept));
             this.socket.send(JSON.stringify(msgAccept));
+            this.setState({flagIsTyping: true});
         }
-        else {
-            var msgAccept = {  
-                Method: "POST",  
-                URL: "chat/send",
-                Authorization: sessionStorage.getItem('authentication'),
-                DATA: {
-                    id: this.state.user.id,
-                    username: this.state.user.username,
-                    content: this.state.inputMessage,
-                    date: getCurrentTimestamp(),
-                }
-            }; 
-            console.log(JSON.stringify(msgAccept));
-            this.socket.send(JSON.stringify(msgAccept));
-        }*/
+    }
+    
+    sendStopTyping = () => {
+        let msgAccept = {  
+            Method: "POST",  
+            URL: "chat/istyping",
+            Authorization: sessionStorage.getItem('authentication'),
+            DATA: {
+                username: this.state.textingFriend.username,
+                type: false,
+            }
+        }; 
+        console.log(JSON.stringify(msgAccept));
+        this.socket.send(JSON.stringify(msgAccept));
+        this.setState({flagIsTyping: false});
     }
     
     render() {
@@ -540,7 +549,7 @@ export default MainPage;
 
 // ====================== Helper functions
 var findIndex = (array, attr, value) => {
-    for(var i = 0; i < array.length; i += 1) {
+    for(let i = 0; i < array.length; i += 1) {
         if(array[i][attr] == value) {
             return i;
         }
