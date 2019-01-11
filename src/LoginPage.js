@@ -6,14 +6,11 @@ class Login extends Component {
         super(props);
         this.initialState = {
             username: '',
-            password: ''
+            password: '',
+            loginFailed: false, 
         };
         this.state = this.initialState;
         this.state.socket = props.socket;
-        console.log("constructor run");
-        this.state.socket.onmessage = (e) => {
-            console.log("thiss did run")
-        };
     }
     handleChange = event => {
         const {name, value} = event.target;
@@ -23,32 +20,31 @@ class Login extends Component {
     }
     handleSubmit = () => {
         const {username, password} = this.state;
-        const socket = this.props.socket;  
-        const history = this.props.history;
-        console.log(socket)
+        const {socket, history, setUser} = this.props;
         var msg = {  
             Method: "POST",  
             URL: "users/login",
             DATA: {
-                username: "vinhloc",
-                password: "123456789"
+                username: username,
+                password: password,
             }  
         }; 
         socket.send(JSON.stringify(msg))
         socket.onmessage = function(event) {
-            var message = event.data;
-            console.log(message)
-            console.log("RUN")
-            var obj = JSON.parse(message);
-            //(if message .....)
-            console.log("token: " + obj.data);
-            sessionStorage.setItem('authentication', obj.data);
-            //console.log(message);
-            history.push("/");
+            var data = event.data;
+            var obj = JSON.parse(data);
+            if (obj.status === 200) {
+                sessionStorage.setItem('authentication', obj.data.token);
+                setUser(obj.data.user);
+                history.push("/");
+            }
+            else {
+                this.setState({loginFailed: true});
+            }
         };
     }
     render() {
-        const {username, password} = this.state;
+        const {username, password, loginFailed} = this.state;
         return (
             <div>
                 <h1>Login</h1>
@@ -70,6 +66,7 @@ class Login extends Component {
                         value="Submit" 
                         onClick={this.handleSubmit} />
                 </form>
+                {loginFailed && <h3>Login not successful, please try again</h3>}
                 <Link to='/register'>Don't have account? Create one!</Link>
             </div>
         );

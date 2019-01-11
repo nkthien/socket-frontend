@@ -30,7 +30,13 @@ const ChatBox = props => {
             </div>
             <div id="inputChatBox" className="ui icon input">
               <i className="telegram plane icon"></i>
-              <input type="text" placeholder="Type a message..." />
+              <input type="text" 
+                    placeholder="Type a message..." 
+                    onKeyPress={(e) => props.handleKeyPress(e, )} 
+                    onChange={(e) => props.handleChange(e)} 
+                    name="inputMessage"
+                    value={props.inputMessage}
+                />
             </div>
         </div>
     );
@@ -55,7 +61,7 @@ const FriendsList = props => {
                           </div>
                           <img className="ui avatar image" src="https://api.adorable.io/avatars/285/asiojdioasd" />
                           <div className="content">
-                            <a className="header">{friendItem.username}</a>
+                            <a className="header" onClick={() => props.initChatBox(friendItem)}>{friendItem.username}</a>
                           </div>
                         </div>
                     )
@@ -69,7 +75,8 @@ const FriendsList = props => {
                     return (
                         <div className="item" key={i}>
                           <div className="right floated content">
-                            <button className="ui positive basic button" onClick={() => props.handleAccept(friendItem.username)}>Accept</button>
+                            {friendItem.status === "request" && <button className="ui disabled button">Requested</button>}
+                            {friendItem.status === "accept" && <button className="ui positive basic button" onClick={() => props.handleAccept(friendItem.id)}>Accept</button>}
                           </div>
                           <img className="ui avatar image" src="https://api.adorable.io/avatars/285/asiojdioasd" />
                           <div className="content">
@@ -83,7 +90,7 @@ const FriendsList = props => {
                     return (
                         <div className="item" key={i}>
                           <div className="right floated content">
-                            <button className="ui basic button" onClick={() => props.handleRequest(friendItem.username)}> <i className="icon user" />Add</button>
+                            <button className="ui basic button" onClick={() => props.handleRequest(friendItem.id)}> <i className="icon user" />Add</button>
                           </div>
                           <img className="ui avatar image" src="https://api.adorable.io/avatars/285/asiojdioasd" />
                           <div className="content">
@@ -180,7 +187,7 @@ const Profile = props => {
 class MainPage extends Component {
     constructor(props) {
         super(props);
-    
+        // _state
         this.state = {
             messageData: [
                 {
@@ -196,7 +203,9 @@ class MainPage extends Component {
                     message: "this is the second test",
                 },
             ],
-            isTyping: true,
+            textingFriend: "",
+            inputMessage: "",
+            isTyping: false,
             knownFriends: [
                 {
                     username: "Windrunner",
@@ -243,20 +252,18 @@ class MainPage extends Component {
                     message: "After Supper the Master dismissed all except Sun Wukong, Zhu Bajie and Sha the Monk. He took them out with him and said, \"Look at that wonderful moolight. It makes me long for the time when I can return home.",
                 },
             ],
-            user: {
-                username: "Spirit Breaker",
-                avatar: "",
-            },
+            user: props.user,
             modalData: {
                 username: "Lina",
                 avatar: ""
-            }
+            },
         };
     }
     
     componentDidMount() {
         this.socket = this.props.socket;
         
+        // api get list friends
         var msgKnownFriends = {  
             Method: "GET",  
             URL: "friend",
@@ -266,25 +273,23 @@ class MainPage extends Component {
         
         
         
-        
+        // api get list strangers
         var msgPotentialFriends = {  
             Method: "GET",  
             URL: "friend?isrequested=1",
             Authorization: sessionStorage.getItem('authentication'),
         }; 
-        console.log(msgPotentialFriends);
         this.socket.send(JSON.stringify(msgPotentialFriends))
         
         
         
         
-        
+        // api get list request
         var msgRequestedFriends = {  
             Method: "GET",  
             URL: "friend?isrequested=2",
             Authorization: sessionStorage.getItem('authentication'),
         }; 
-        console.log(msgRequestedFriends);
         this.socket.send(JSON.stringify(msgRequestedFriends))
         
         
@@ -292,74 +297,105 @@ class MainPage extends Component {
         
         
         
-        var findIndex = (array, attr, value) => {
-            console.log(array);
-            console.log("value: " + value);
-            for(var i = 0; i < array.length; i += 1) {
-                console.log("item: " + array[i].username); 
-                if(array[i].username == value) {
-                    return i;
-                }
-            }
-            return -1;
-        }
-        var test = findIndex(this.state.requestedFriends, "username", "vinhloc2");
-        console.log("test: " + test);
+                
+        // _response
         this.socket.onmessage = (e) => { 
-            console.log(e.data);
-            let objs = JSON.parse(e.data);
-            console.log(objs);
+            console.log("------------------------------")
+            console.log(e);
+            let obj = JSON.parse(e.data);
+           
             // get friend list
-            if(objs.status === 200 && objs.method === 'GET' && objs.url === 'friend') { 
+            if(obj.status === 200 && obj.method === 'GET' && obj.url === 'friend') { 
                 this.setState({
-                  knownFriends: [...this.state.knownFriends, ...objs.data]  
+                  knownFriends: [...this.state.knownFriends, ...obj.data]  
                 });
             }
             // get unknown people
-            else if(objs.status === 200 && objs.method === 'GET' && objs.url === 'friend?isrequested=2') {
+            else if(obj.status === 200 && obj.method === 'GET' && obj.url === 'friend?isrequested=2') {
                 this.setState({
-                  potentialFriends: [...this.state.potentialFriends, ...objs.data]  
+                  potentialFriends: [...this.state.potentialFriends, ...obj.data]  
                 });
-                console.log("unknown: " + this.state.potentialFriends);
             }
             // get requested people
-            else if(objs.status === 200 && objs.method === 'GET' && objs.url === 'friend?isrequested=1') {
+            else if(obj.status === 200 && obj.method === 'GET' && obj.url === 'friend?isrequested=1') {
                 this.setState({
-                  requestedFriends: [...this.state.requestedFriends, ...objs.data]  
+                  requestedFriends: [...this.state.requestedFriends, ...obj.data]  
                 });
-                console.log("requested: " + this.state.requestedFriends);
             }
-            // accept requested friend
-            else if(objs.status === 200 && objs.method === 'POST' && objs.url === 'friend/accept') {
-                var arrayRequested = [...this.state.requestedFriends]; 
-                console.log(arrayRequested);
-                var index = findIndex(arrayRequested, "username", objs.data.username);
-                console.log(index);
+            // accept friend request
+            else if(obj.status === 200 && obj.method === 'POST' && obj.url === 'friend/accept') {
+                let arrayRequested = [...this.state.requestedFriends]; 
+                let index = findIndex(arrayRequested, "username", obj.data.username);
                 if (index !== -1) {
-                    var user = arrayRequested[index];
                     arrayRequested.splice(index, 1);
-                    user.isOnline = objs.data.isOnline;
                     
-                    var arrayFriend = [...this.state.knownFriends]; 
-                    arrayFriend.push(user);
+                    let arrayFriend = [...this.state.knownFriends]; 
+                    arrayFriend.push(obj.data);
                     this.setState({requestedFriends: arrayRequested, knownFriends: arrayFriend});
                 }   
             }
-            else if(objs.status === 200 && objs.method === 'POST' && objs.url === 'friend/add') {
-                var arrayPotential = [...this.state.potentialFriends]; 
-                console.log(arrayPotential);
-                var index = findIndex(arrayPotential, "username", objs.data.username);
-                console.log(index);
+            // request friend
+            else if(obj.status === 200 && obj.method === 'POST' && obj.url === 'friend/add') {
+                let arrayPotential = [...this.state.potentialFriends]; 
+                let index = findIndex(arrayPotential, "username", obj.data.username);
                 if (index !== -1) {
-                    var user = arrayPotential[index];
                     arrayPotential.splice(index, 1);
                     
-                    var arrayRequested = [...this.state.requestedFriends]; 
-                    arrayRequested.push(user);
+                    let arrayRequested = [...this.state.requestedFriends]; 
+                    arrayRequested.push(obj.data);
                     this.setState({potentialFriends: arrayPotential, requestedFriends: arrayRequested});
                 }   
             }
+            // fetch messages
+            else if(obj.status === 200 && obj.method === 'GET' && obj.url.startsWith('chat/')) {
+                let data = obj.data;  
+                let messageArray = [];
+                for(let i = data.length - 1; i >= 0; i--) {
+                    let item = data[i];
+                    if(this.state.user.id == item.senderid) {
+                        let tmpUser = this.state.user;
+                        let tmpAvatar = tmpUser.avatar ? tmpUser.avatar : ("https://api.adorable.io/avatars/285/" + tmpUser.username);
+                        let msg = {
+                            username: tmpUser.username,
+                            avatar: tmpAvatar,
+                            date: convertTimestampToDate(item.date),
+                            message: item.content,
+                        }
+                        messageArray.push(msg);
+                        continue;
+                    }
+                    let idx = findIndex(this.state.knownFriends, "id", item.senderid);
+                    if(idx != -1) {
+                        let tmpUser = this.state.knownFriends[idx];
+                        let tmpAvatar = tmpUser.avatar ? tmpUser.avatar : ("https://api.adorable.io/avatars/285/" + tmpUser.username);
+                        let msg = {
+                            username: tmpUser.username,
+                            avatar: tmpAvatar,
+                            date: convertTimestampToDate(item.date),
+                            message: item.content,
+                        }
+                        messageArray.push(msg);
+                    }
+                }
+                this.setState({messageData: messageArray});   
+            }
+            // receive message
+            else if(obj.status === 200 && obj.method === 'POST' && obj.url === 'chat/receive') {
+                console.log("nhan dc roi")
+                console.log(obj.data)
+                let data = obj.data;
+                let tmpAvatar = data.avatar ? data.avatar : ("https://api.adorable.io/avatars/285/" + data.username);
+                let msg = {
+                    username: data.username,
+                    message: data.content,
+                    date: data.date,
+                    avatar:tmpAvatar,
+                }
+                this.setState({messageData: [...this.state.messageData, msg]});   
+            }
         };  
+        
+        
     };
     
     openProfile = userId => {
@@ -367,41 +403,113 @@ class MainPage extends Component {
     };
     
     handleAccept = target => {
+        // api post accept friend
         var msgAccept = {  
             Method: "POST",  
             URL: "friend/accept",
             Authorization: sessionStorage.getItem('authentication'),
             DATA: {
-                username: target,
+                id: target,
             }
         }; 
-        console.log(msgAccept);
         this.socket.send(JSON.stringify(msgAccept))
     };
     
     handleRequest = target => {
+        // api post request add friend
         var msgAccept = {  
             Method: "POST",  
             URL: "friend/add",
             Authorization: sessionStorage.getItem('authentication'),
             DATA: {
-                username: target,
+                id: target,
             }
         }; 
-        console.log(msgAccept);
         this.socket.send(JSON.stringify(msgAccept))
     };
+    
+    initChatBox = friend => {
+        // api fetch messages
+        var msgAccept = {  
+            Method: "GET",  
+            URL: "chat/" + friend.id,
+            Authorization: sessionStorage.getItem('authentication'),
+        }; 
+        this.socket.send(JSON.stringify(msgAccept));
+        this.setState({textingFriend: friend});
+    }
+
+    handleChange = event => {
+        const {name, value} = event.target;
+        this.setState({
+            [name] : value
+        });
+    }
+    
+    flagIsTyping = false;
+    // send message
+    handleKeyPress = (e) => {
+        if(e.key === "Enter") {
+            var msgAccept = {  
+                Method: "POST",  
+                URL: "chat/send",
+                Authorization: sessionStorage.getItem('authentication'),
+                DATA: {
+                    id: this.state.textingFriend.id,
+                    username: this.state.textingFriend.username,
+                    content: this.state.inputMessage,
+                    date: getCurrentTimestamp(),
+                }
+            }; 
+            console.log(JSON.stringify(msgAccept));
+            this.socket.send(JSON.stringify(msgAccept));
+            this.setState({inputMessage: ""});
+        }
+        /*
+        if(flagIsTyping) {
+            var msgAccept = {  
+                Method: "POST",  
+                URL: "chat/send",
+                Authorization: sessionStorage.getItem('authentication'),
+                DATA: {
+                    id: this.state.user.id,
+                    username: this.state.user.username,
+                    content: this.state.inputMessage,
+                    date: getCurrentTimestamp(),
+                }
+            }; 
+            console.log(JSON.stringify(msgAccept));
+            this.socket.send(JSON.stringify(msgAccept));
+        }
+        else {
+            var msgAccept = {  
+                Method: "POST",  
+                URL: "chat/send",
+                Authorization: sessionStorage.getItem('authentication'),
+                DATA: {
+                    id: this.state.user.id,
+                    username: this.state.user.username,
+                    content: this.state.inputMessage,
+                    date: getCurrentTimestamp(),
+                }
+            }; 
+            console.log(JSON.stringify(msgAccept));
+            this.socket.send(JSON.stringify(msgAccept));
+        }*/
+    }
     
     render() {
         return (
             <div className="ui grid">
                 <div className="four wide column">
                     <FriendsList
+                        user={this.state.user}
                         knownFriends={this.state.knownFriends}
                         potentialFriends={this.state.potentialFriends}
                         requestedFriends={this.state.requestedFriends}
                         handleAccept={this.handleAccept}
                         handleRequest={this.handleRequest}
+                        initChatBox={this.initChatBox}
                     />
                 </div>
                 <div className="six wide column">          
@@ -409,11 +517,15 @@ class MainPage extends Component {
                         openProfile={this.openProfile}
                         messageData={this.state.messageData}
                         isTyping={this.state.isTyping}
+                        handleKeyPress={this.handleKeyPress}
+                        handleChange={this.handleChange}
+                        inputMessage={this.state.inputMessage}
                     />
                 </div>
                 <div className="six wide column">
                     <NewsFeed 
                         feedData={this.state.feedData}
+                        handleChange={this.handleChange}
                     />
                 </div>
                 <Profile 
@@ -424,3 +536,24 @@ class MainPage extends Component {
     }
 }
 export default MainPage;
+
+
+// ====================== Helper functions
+var findIndex = (array, attr, value) => {
+    for(var i = 0; i < array.length; i += 1) {
+        if(array[i][attr] == value) {
+            return i;
+        }
+    }
+    return -1;
+}
+var convertTimestampToDate = (unix_timestamp) => {
+  let date = new Date(unix_timestamp*1000);
+  let hours = date.getHours();
+  let minutes = "0" + date.getMinutes();
+  return hours + ':' + minutes.substr(-2);
+}
+
+var getCurrentTimestamp = () => {
+  return Math.round((new Date()).getTime() / 1000);
+}
