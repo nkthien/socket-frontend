@@ -12,10 +12,9 @@ class App extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            socket: new WebSocket(address),
+            //socket: new WebSocket(address),
             user: {},
         };
-        console.log(this.state.socket);
     }
     
     setUser = (user) => {
@@ -23,7 +22,9 @@ class App extends Component {
     }
     
     render() {
-        const socket = this.state.socket; 
+        const socket = new WebSocket(address); 
+        console.log("run")
+        console.log(socket)
         return (
             <Switch>
                 <Route exact path="/" render={() => (

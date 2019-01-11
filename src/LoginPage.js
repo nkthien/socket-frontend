@@ -35,6 +35,7 @@ class Login extends Component {
             var obj = JSON.parse(data);
             if (obj.status === 200) {
                 sessionStorage.setItem('authentication', obj.data.token);
+                sessionStorage.setItem('user', JSON.stringify(obj.data.user));
                 setUser(obj.data.user);
                 history.push("/");
             }

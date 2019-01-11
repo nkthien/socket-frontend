@@ -260,7 +260,7 @@ class MainPage extends Component {
                     date: "86:68",
                 },
             ],
-            user: props.user,
+            user: JSON.parse(sessionStorage.getItem('user')),
             modalData: {
                 username: "Lina",
                 avatar: ""
@@ -270,7 +270,37 @@ class MainPage extends Component {
     
     componentDidMount() {
         this.socket = this.props.socket;
+        this.send(this.initMainPage);
+    };
+     
+    send = function (callback) {
+        this.waitForConnection(function () {
+            if (typeof callback !== 'undefined') {
+                callback();
+            }
+        }, 500);
+    };
+    waitForConnection = function (callback, interval) {
+        if (this.socket.readyState === 1) {
+            callback();
+        } else {
+            var that = this;
+            // optional: implement backoff for interval here
+            setTimeout(function () {
+                that.waitForConnection(callback, interval);
+            }, interval);
+        }
+    };
+    
         
+    initMainPage = () => {    
+        // api init connection
+        let msgReqCon = {  
+            Method: "GET",  
+            URL: "connect",
+            Authorization: sessionStorage.getItem('authentication'),
+        }; 
+        this.socket.send(JSON.stringify(msgReqCon));
         // ============================ _request _init
         // api get list friends
         let msgReqFriends = {  
@@ -303,8 +333,6 @@ class MainPage extends Component {
             Authorization: sessionStorage.getItem('authentication'),
         }; 
         this.socket.send(JSON.stringify(msgReqPost));
-         
-         
          
          
          
@@ -362,7 +390,7 @@ class MainPage extends Component {
                 let messageArray = [];
                 for(let i = data.length - 1; i >= 0; i--) {
                     let item = data[i];
-                    if(this.state.user.id == item.senderid) {
+                    if(this.state.user.id === item.senderid) {
                         let tmpUser = this.state.user;
                         let tmpAvatar = tmpUser.avatar ? tmpUser.avatar : ("https://api.adorable.io/avatars/285/" + tmpUser.username);
                         let msg = {
