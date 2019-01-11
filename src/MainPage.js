@@ -1,4 +1,5 @@
 import React, {Component} from 'react';
+import {withRouter} from 'react-router-dom';
 
 const ChatBox = props => {
     return (
@@ -113,6 +114,7 @@ const NewsFeed = props => {
           <div className="event">
             <div className="label">
               <img src={"https://api.adorable.io/avatars/285/" + props.user.username} />
+              <button className="circular ui icon button" onClick={() => {props.handlelogout()}}><i className="icon settings"></i></button>
             </div>
             <div className="content">
               <div className="ui form">
@@ -146,7 +148,7 @@ const NewsFeed = props => {
                       </div>
                       <div className="meta">
                         <a className="like">
-                          <i className="like icon"></i> 5 Likes
+                          <i className="like icon"></i> Likes
                         </a>
                       </div>
                     </div>
@@ -616,6 +618,20 @@ class MainPage extends Component {
         }
     }
     
+    handleLogout = () => {
+        const history = this.props.history;
+        // api send stop typing
+        let msgReq = {  
+            Method: "POST",  
+            URL: "users/logout",
+            Authorization: sessionStorage.getItem('authentication'),
+        }; 
+        console.log(JSON.stringify(msgReq));
+        this.socket.send(JSON.stringify(msgReq));
+        sessionStorage.removeItem("authentication")
+        history.push("/login");
+    }
+    
     sendStopTyping = () => {
         // api send stop typing
         let msgReq = {  
@@ -664,6 +680,7 @@ class MainPage extends Component {
                         handleKeyPressPost={this.handleKeyPressPost}
                         feedData={this.state.feedData}
                         postMessage={this.state.postMessage}
+                        handlelogout={this.handleLogout}
                     />
                 </div>
                 <Profile 
@@ -673,7 +690,7 @@ class MainPage extends Component {
         );
     }
 }
-export default MainPage;
+export default withRouter(MainPage);
 
 
 // ====================== Helper functions

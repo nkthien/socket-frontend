@@ -5,7 +5,7 @@ import LoginPage from './LoginPage';
 import RegisterPage from './RegisterPage';
 
 
-const address = 'ws://192.168.1.11:65432';
+const address = 'ws://myprojectsocket.serveo.net:65432';
 
 
 class App extends Component {

@@ -9,6 +9,10 @@
     "react-scripts": "2.1.2",
     "utf8": "^3.0.0"
   },
+  "engines": {
+    "npm": "6.5.0",
+    "node": "10.14.2"
+  },
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
