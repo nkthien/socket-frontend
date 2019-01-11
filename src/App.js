@@ -5,14 +5,13 @@ import LoginPage from './LoginPage';
 import RegisterPage from './RegisterPage';
 
 
-const address = 'ws://myprojectsocket.serveo.net:65432';
-
+//const address = 'wss://myprojectsocket.serveo.net:65432';
+const address = 'ws://localhost:8000';
 
 class App extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            //socket: new WebSocket(address),
             user: {},
         };
     }
@@ -23,8 +22,6 @@ class App extends Component {
     
     render() {
         const socket = new WebSocket(address); 
-        console.log("run")
-        console.log(socket)
         return (
             <Switch>
                 <Route exact path="/" render={() => (

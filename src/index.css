@@ -6,11 +6,16 @@ body {
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  height: 100%
 }
 
 code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New",
     monospace;
+}
+
+#root {
+    height: 100%;
 }
 
 .dot {
@@ -30,4 +35,24 @@ code {
 
 #inputFriendsList {
     width: 100%;
+}
+
+#knownFriends {
+    height: 230px;
+    overflow-y: scroll;
+}
+
+#strangers {
+    height: 230px;
+    overflow-y: scroll;
+}
+
+#history {
+    height: 600px;
+    overflow-y: scroll;
+}
+
+#postFeed {
+    height: 520px;
+    overflow-y: scroll;
 }

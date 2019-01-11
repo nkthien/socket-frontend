@@ -52,7 +52,7 @@ const FriendsList = props => {
           <input type="text" placeholder="Search..." />
         </div>
         <h3>Friends</h3>
-        <div className="ui middle aligned animated list">
+        <div id="knownFriends" className="ui middle aligned animated list">
             {
                 props.knownFriends.map((friendItem, i) => {
                     return (
@@ -70,7 +70,7 @@ const FriendsList = props => {
             }
         </div>
         <h3>People you may know</h3>
-        <div className="ui middle aligned list">
+        <div id="strangers" className="ui middle aligned list">
             {
                 props.requestedFriends.map((friendItem, i) => {
                     return (
@@ -113,8 +113,8 @@ const NewsFeed = props => {
         <div className="ui feed segment">
           <div className="event">
             <div className="label">
-              <img src={"https://api.adorable.io/avatars/285/" + props.user.username} />
-              <button className="circular ui icon button" onClick={() => {props.handlelogout()}}><i className="icon settings"></i></button>
+              <img style={{cursor: "pointer"}} onClick={() => {props.openProfile(props.user.username)}} src={"https://api.adorable.io/avatars/285/" + props.user.username} />
+              <a style={{cursor: "pointer"}} onClick={() => {props.handlelogout()}}>Logout</a>
             </div>
             <div className="content">
               <div className="ui form">
@@ -128,7 +128,7 @@ const NewsFeed = props => {
             </div>
           </div>
         </div>
-        <div className="ui feed segment">
+        <div id="postFeed" className="ui feed segment">
         {
             props.feedData.map((feedItem, i) => {
                 return (
@@ -148,7 +148,7 @@ const NewsFeed = props => {
                       </div>
                       <div className="meta">
                         <a className="like">
-                          <i className="like icon"></i> Likes
+                          <i className="like icon"></i> Like
                         </a>
                       </div>
                     </div>
@@ -166,16 +166,15 @@ const Profile = props => {
         <div className="ui modal">
           <i className="close icon"></i>
           <div className="header">
-            Profile Picture
+            Profile
           </div>
           <div className="image content">
             <div className="ui medium image">
-              <img src={"https://api.adorable.io/avatars/285/" + props.user.username} />
+              <img src={"https://api.adorable.io/avatars/285/" + props.modalData.username} />
             </div>
             <div className="description">
-              <div className="ui header">We've auto-chosen a profile image for you.</div>
-              <p>We've grabbed the following image from the <a href="https://www.gravatar.com" target="_blank">gravatar</a> image associated with your registered e-mail address.</p>
-              <p>Is it okay to use this photo?</p>
+              <div className="ui header">{props.modalData.username}</div>
+              <p>yêu màu tím , thích màu hồng, sống nội tâm, hay khóc thầm,ghét sự giả dối...đặc biệt rất thích ăn rau dền...</p>
             </div>
           </div>
           <div className="actions">
@@ -183,7 +182,7 @@ const Profile = props => {
               Nope
             </div>
             <div className="ui positive right labeled icon button">
-              Yep, that's me
+              Add friend
               <i className="checkmark icon"></i>
             </div>
           </div>
@@ -264,7 +263,7 @@ class MainPage extends Component {
             ],
             user: JSON.parse(sessionStorage.getItem('user')),
             modalData: {
-                username: "Lina",
+                username: "",
                 avatar: ""
             },
         };
@@ -340,8 +339,6 @@ class MainPage extends Component {
          
         // ============================ _response
         this.socket.onmessage = (e) => { 
-            console.log("------------------------------")
-            console.log(e);
             let obj = JSON.parse(e.data);
            
             // get friend list
@@ -380,7 +377,6 @@ class MainPage extends Component {
                 let index = findIndex(arrayPotential, "username", obj.data.username);
                 if (index !== -1) {
                     arrayPotential.splice(index, 1);
-                    
                     let arrayRequested = [...this.state.requestedFriends]; 
                     arrayRequested.push(obj.data);
                     this.setState({potentialFriends: arrayPotential, requestedFriends: arrayRequested});
@@ -405,7 +401,7 @@ class MainPage extends Component {
                         continue;
                     }
                     let idx = findIndex(this.state.knownFriends, "id", item.senderid);
-                    if(idx != -1) {
+                    if(idx !== -1) {
                         let tmpUser = this.state.knownFriends[idx];
                         let tmpAvatar = tmpUser.avatar ? tmpUser.avatar : ("https://api.adorable.io/avatars/285/" + tmpUser.username);
                         let msg = {
@@ -439,7 +435,6 @@ class MainPage extends Component {
             // online notify
             else if(obj.status === 200 && obj.method === 'GET' && obj.url === 'online') {
                 let data = obj.data;
-                console.log(data);
                 let friendArray = [...this.state.knownFriends];
                 let idx = findIndex(friendArray, "id", data.id);
                 friendArray[idx].isOnline = true;
@@ -448,7 +443,6 @@ class MainPage extends Component {
             // offine notify
             else if(obj.status === 200 && obj.method === 'GET' && obj.url === 'offline') {
                 let data = obj.data;
-                console.log(data);
                 let friendArray = [...this.state.knownFriends];
                 let idx = findIndex(friendArray, "id", data.id);
                 friendArray[idx].isOnline = false;
@@ -457,9 +451,7 @@ class MainPage extends Component {
             // receive post
             else if(obj.status === 200 && obj.method === 'GET' && obj.url === 'newblog') {
                 let data = obj.data;
-                console.log(data);
                 let idx = findIndex(this.state.knownFriends, "id", data.id);
-                console.log(idx);
                 let tmpUser = this.state.knownFriends[idx];
                 if(data.id === this.state.user.id) tmpUser = this.state.user;
                 let tmpAvatar = tmpUser.avatar ? tmpUser.avatar : ("https://api.adorable.io/avatars/285/" + tmpUser.username);
@@ -474,13 +466,11 @@ class MainPage extends Component {
             // fetch post
             else if(obj.status === 200 && obj.method === 'GET' && obj.url === 'blog/get') {
                 let data = obj.data;
-                console.log(obj);
                 let arrayPost = [];
                 for(let i = 0; i < data.length; i++) {
                     let idx = findIndex(this.state.knownFriends, "id", data[i].id);
                     let tmpUser = this.state.knownFriends[idx];
                     if(data[i].id === this.state.user.id) tmpUser = this.state.user;
-                    console.log(tmpUser);
                     let tmpAvatar = tmpUser.avatar ? tmpUser.avatar : ("https://api.adorable.io/avatars/285/" + tmpUser.username);
                     let postItem = {
                         username: tmpUser.username,
@@ -490,14 +480,16 @@ class MainPage extends Component {
                     }
                     arrayPost.push(postItem);
                 }
-                console.log(this.state.feedData);
-                console.log(arrayPost);
                 this.setState({feedData: arrayPost});   
             }
         };  
     };
   
-    openProfile = userId => {
+    openProfile = username => {
+        let idx = findIndex(this.state.knownFriends, "username", username);
+        let tmpUser = this.state.knownFriends[idx];
+        if(username === this.state.user.username) tmpUser = this.state.user;
+        this.setState({modalData: tmpUser});
         window.openModalProfile();
     };
     
@@ -543,7 +535,7 @@ class MainPage extends Component {
         this.setState({
             [name] : value
         });
-        if(name == "inputMessage" && value === "") {
+        if(name === "inputMessage" && value === "") {
             this.sendStopTyping();
         }
     }
@@ -612,7 +604,6 @@ class MainPage extends Component {
                     type: true,
                 }
             }; 
-            console.log(JSON.stringify(msgReq));
             this.socket.send(JSON.stringify(msgReq));
             this.setState({flagIsTyping: true});
         }
@@ -626,7 +617,6 @@ class MainPage extends Component {
             URL: "users/logout",
             Authorization: sessionStorage.getItem('authentication'),
         }; 
-        console.log(JSON.stringify(msgReq));
         this.socket.send(JSON.stringify(msgReq));
         sessionStorage.removeItem("authentication")
         history.push("/login");
@@ -643,7 +633,6 @@ class MainPage extends Component {
                 type: false,
             }
         }; 
-        console.log(JSON.stringify(msgReq));
         this.socket.send(JSON.stringify(msgReq));
         this.setState({flagIsTyping: false});
     }
@@ -681,10 +670,11 @@ class MainPage extends Component {
                         feedData={this.state.feedData}
                         postMessage={this.state.postMessage}
                         handlelogout={this.handleLogout}
+                        openProfile={this.openProfile}
                     />
                 </div>
                 <Profile 
-                    user={this.state.user} 
+                    modalData={this.state.modalData} 
                 />
             </div>   
         );

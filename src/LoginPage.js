@@ -21,7 +21,7 @@ class Login extends Component {
     handleSubmit = () => {
         const {username, password} = this.state;
         const {socket, history, setUser} = this.props;
-        var msg = {  
+        let msg = {  
             Method: "POST",  
             URL: "users/login",
             DATA: {
@@ -31,8 +31,16 @@ class Login extends Component {
         }; 
         socket.send(JSON.stringify(msg))
         socket.onmessage = function(event) {
-            var data = event.data;
-            var obj = JSON.parse(data);
+            let data = event.data;
+            let obj = JSON.parse(data);
+            // ============ DEBUG ===============
+            sessionStorage.setItem('authentication', data);
+            let user = {
+                username: "me", 
+            }
+            sessionStorage.setItem('user', JSON.stringify(user));
+            history.push("/");
+            // ==================================
             if (obj.status === 200) {
                 sessionStorage.setItem('authentication', obj.data.token);
                 sessionStorage.setItem('user', JSON.stringify(obj.data.user));
@@ -40,7 +48,7 @@ class Login extends Component {
                 history.push("/");
             }
             else {
-                this.setState({loginFailed: true});
+                // handle fail
             }
         };
     }
