@@ -112,11 +112,16 @@ const NewsFeed = props => {
         <div className="ui feed segment">
           <div className="event">
             <div className="label">
-              <img src="https://api.adorable.io/avatars/285/ajhgfdsioasd" />
+              <img src={"https://api.adorable.io/avatars/285/" + props.user.username} />
             </div>
             <div className="content">
               <div className="ui form">
-                <textarea rows="3" placeholder="What's on your mind..."></textarea>
+                <textarea rows="3" placeholder="What's on your mind..."
+                            onKeyPress={(e) => props.handleKeyPressPost(e)} 
+                            onChange={(e) => props.handleChangePost(e)} 
+                            name="postMessage"
+                            value={props.postMessage}
+                ></textarea>
               </div>
             </div>
           </div>
@@ -127,13 +132,13 @@ const NewsFeed = props => {
                 return (
                   <div className="event" key={i}>
                     <div className="label">
-                      <img src="https://api.adorable.io/avatars/285/aasdioasd" />
+                      <img src={feedItem.avatar} />
                     </div>
                     <div className="content">
                       <div className="summary">
                         <a>{feedItem.username}</a> posted on his page
                         <div className="date">
-                          3 days ago
+                          {feedItem.date}
                         </div>
                       </div>
                       <div className="extra text">
@@ -206,6 +211,7 @@ class MainPage extends Component {
             textingFriend: "",
             inputMessage: "",
             isTyping: false,
+            postMessage: "",
             knownFriends: [
                 {
                     username: "Windrunner",
@@ -245,11 +251,13 @@ class MainPage extends Component {
                     username: "Ursa",
                     avatar: "",
                     message: "Ours is a life of constant reruns. We're always circling back to where we'd we started, then starting all over again. Even if we don't run extra laps that day, we surely will come back for more of the same another day soon.",
+                    date: "68:86",
                 },
                 {
                     username: "Monkey King",
                     avatar: "",
                     message: "After Supper the Master dismissed all except Sun Wukong, Zhu Bajie and Sha the Monk. He took them out with him and said, \"Look at that wonderful moolight. It makes me long for the time when I can return home.",
+                    date: "86:68",
                 },
             ],
             user: props.user,
@@ -263,31 +271,42 @@ class MainPage extends Component {
     componentDidMount() {
         this.socket = this.props.socket;
         
-        
         // ============================ _request _init
         // api get list friends
-        let msgReq = {  
+        let msgReqFriends = {  
             Method: "GET",  
             URL: "friend",
             Authorization: sessionStorage.getItem('authentication'),
         }; 
-        this.socket.send(JSON.stringify(msgReq))
+        this.socket.send(JSON.stringify(msgReqFriends));
         
         // api get list strangers
-        let msgReq = {  
+        let msgReqStrangers = {  
             Method: "GET",  
             URL: "friend?isrequested=1",
             Authorization: sessionStorage.getItem('authentication'),
         }; 
-        this.socket.send(JSON.stringify(msgReq))
+        this.socket.send(JSON.stringify(msgReqStrangers));
       
-        // api get list request
-        let msgReq = {  
+        // api get list request friend
+        let msgReqRequest = {  
             Method: "GET",  
             URL: "friend?isrequested=2",
             Authorization: sessionStorage.getItem('authentication'),
         }; 
-        this.socket.send(JSON.stringify(msgReq))
+        this.socket.send(JSON.stringify(msgReqRequest));
+        
+        // api get list posts
+        let msgReqPost = {  
+            Method: "GET",  
+            URL: "blog/get",
+            Authorization: sessionStorage.getItem('authentication'),
+        }; 
+        this.socket.send(JSON.stringify(msgReqPost));
+         
+         
+         
+         
          
         // ============================ _response
         this.socket.onmessage = (e) => { 
@@ -382,12 +401,68 @@ class MainPage extends Component {
                 }
                 this.setState({messageData: [...this.state.messageData, msg]});   
             }
-            // is typing notify
+            // typing notify
             else if(obj.status === 200 && obj.method === 'POST' && obj.url === 'chat/istyping') {
-                console.log("typing bla bla bla");
-                console.log(obj.data);
                 let data = obj.data;
                 this.setState({isTyping: data.type});
+            }
+            // online notify
+            else if(obj.status === 200 && obj.method === 'GET' && obj.url === 'online') {
+                let data = obj.data;
+                console.log(data);
+                let friendArray = [...this.state.knownFriends];
+                let idx = findIndex(friendArray, "id", data.id);
+                friendArray[idx].isOnline = true;
+                this.setState({knownFriends: friendArray});   
+            }
+            // offine notify
+            else if(obj.status === 200 && obj.method === 'GET' && obj.url === 'offline') {
+                let data = obj.data;
+                console.log(data);
+                let friendArray = [...this.state.knownFriends];
+                let idx = findIndex(friendArray, "id", data.id);
+                friendArray[idx].isOnline = false;
+                this.setState({knownFriends: friendArray});   
+            }
+            // receive post
+            else if(obj.status === 200 && obj.method === 'GET' && obj.url === 'newblog') {
+                let data = obj.data;
+                console.log(data);
+                let idx = findIndex(this.state.knownFriends, "id", data.id);
+                console.log(idx);
+                let tmpUser = this.state.knownFriends[idx];
+                if(data.id === this.state.user.id) tmpUser = this.state.user;
+                let tmpAvatar = tmpUser.avatar ? tmpUser.avatar : ("https://api.adorable.io/avatars/285/" + tmpUser.username);
+                let postItem = {
+                    username: tmpUser.username,
+                    avatar: tmpAvatar,
+                    message: data.content,
+                    date: convertTimestampToDate(data.date),
+                }
+                this.setState({feedData: [postItem, ...this.state.feedData]});   
+            }
+            // fetch post
+            else if(obj.status === 200 && obj.method === 'GET' && obj.url === 'blog/get') {
+                let data = obj.data;
+                console.log(obj);
+                let arrayPost = [];
+                for(let i = 0; i < data.length; i++) {
+                    let idx = findIndex(this.state.knownFriends, "id", data[i].id);
+                    let tmpUser = this.state.knownFriends[idx];
+                    if(data[i].id === this.state.user.id) tmpUser = this.state.user;
+                    console.log(tmpUser);
+                    let tmpAvatar = tmpUser.avatar ? tmpUser.avatar : ("https://api.adorable.io/avatars/285/" + tmpUser.username);
+                    let postItem = {
+                        username: tmpUser.username,
+                        avatar:tmpAvatar,
+                        message: data[i].content,
+                        date: convertTimestampToDate(data[i].date),    
+                    }
+                    arrayPost.push(postItem);
+                }
+                console.log(this.state.feedData);
+                console.log(arrayPost);
+                this.setState({feedData: arrayPost});   
             }
         };  
     };
@@ -442,6 +517,31 @@ class MainPage extends Component {
             this.sendStopTyping();
         }
     }
+    
+    handleChangePost = event => {
+        const {name, value} = event.target;
+        this.setState({
+            [name] : value
+        });
+    }
+    
+    handleKeyPressPost = (e) => {
+        if(e.key === "Enter" && this.state.postMessage !== "") {
+            // api get post
+            let msgReq = {  
+                Method: "POST",  
+                URL: "blog/create",
+                Authorization: sessionStorage.getItem('authentication'),
+                DATA: {
+                    id: this.state.user.id,
+                    content: this.state.postMessage,
+                    date: getCurrentTimestamp(),
+                }
+            }; 
+            this.socket.send(JSON.stringify(msgReq));
+            this.setState({postMessage: ""});
+        }
+    };
     
     flagIsTyping = false;
     handleKeyPress = (e) => {
@@ -531,8 +631,11 @@ class MainPage extends Component {
                 </div>
                 <div className="six wide column">
                     <NewsFeed 
+                        user={this.state.user}
+                        handleChangePost={this.handleChangePost}
+                        handleKeyPressPost={this.handleKeyPressPost}
                         feedData={this.state.feedData}
-                        handleChange={this.handleChange}
+                        postMessage={this.state.postMessage}
                     />
                 </div>
                 <Profile 
@@ -555,10 +658,10 @@ var findIndex = (array, attr, value) => {
     return -1;
 }
 var convertTimestampToDate = (unix_timestamp) => {
-  let date = new Date(unix_timestamp*1000);
-  let hours = date.getHours();
-  let minutes = "0" + date.getMinutes();
-  return hours + ':' + minutes.substr(-2);
+    let date = new Date(unix_timestamp*1000);
+    let hours = date.getHours();
+    let minutes = "0" + date.getMinutes();
+    return hours + ':' + minutes.substr(-2);
 }
 
 var getCurrentTimestamp = () => {

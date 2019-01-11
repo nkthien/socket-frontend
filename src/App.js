@@ -4,21 +4,17 @@ import MainPage from './MainPage';
 import LoginPage from './LoginPage';
 import RegisterPage from './RegisterPage';
 
-const isLoggedIn = () => {
-    return !sessionStorage.getItem('authentication');
-};
+
+const address = 'ws://192.168.1.11:65432';
+
 
 class App extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            socket: new WebSocket('ws://10.10.232.173:65432'),
-            //socket: new WebSocket('ws://localhost:8000'),
+            socket: new WebSocket(address),
             user: {},
         };
-        //if(!this.state.socket)
-        //    this.state.socket = new WebSocket('ws://192.168.1.18:65432');
-        //console.log("state:")
         console.log(this.state.socket);
     }
     
@@ -34,6 +30,7 @@ class App extends Component {
                     !isLoggedIn() ? (<MainPage 
                                         socket={socket} 
                                         user={this.state.user}
+                                        address={address}
                                     />) : (<Redirect to="/login" />))} />
                 <Route path="/login" render={() => (
                     isLoggedIn() ? (<LoginPage 
@@ -51,3 +48,8 @@ class App extends Component {
 }
 
 export default App;
+
+// ============================== Helper functions
+const isLoggedIn = () => {
+    return !sessionStorage.getItem('authentication');
+};
