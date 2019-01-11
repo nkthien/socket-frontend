@@ -263,42 +263,33 @@ class MainPage extends Component {
     componentDidMount() {
         this.socket = this.props.socket;
         
+        
+        // ============================ _request _init
         // api get list friends
-        let msgKnownFriends = {  
+        let msgReq = {  
             Method: "GET",  
             URL: "friend",
             Authorization: sessionStorage.getItem('authentication'),
         }; 
-        this.socket.send(JSON.stringify(msgKnownFriends))
-        
-        
+        this.socket.send(JSON.stringify(msgReq))
         
         // api get list strangers
-        let msgPotentialFriends = {  
+        let msgReq = {  
             Method: "GET",  
             URL: "friend?isrequested=1",
             Authorization: sessionStorage.getItem('authentication'),
         }; 
-        this.socket.send(JSON.stringify(msgPotentialFriends))
-        
-        
-        
-        
+        this.socket.send(JSON.stringify(msgReq))
+      
         // api get list request
-        let msgRequestedFriends = {  
+        let msgReq = {  
             Method: "GET",  
             URL: "friend?isrequested=2",
             Authorization: sessionStorage.getItem('authentication'),
         }; 
-        this.socket.send(JSON.stringify(msgRequestedFriends))
-        
-        
-        
-        
-        
-        
-                
-        // _response
+        this.socket.send(JSON.stringify(msgReq))
+         
+        // ============================ _response
         this.socket.onmessage = (e) => { 
             console.log("------------------------------")
             console.log(e);
@@ -407,7 +398,7 @@ class MainPage extends Component {
     
     handleAccept = target => {
         // api post accept friend
-        let msgAccept = {  
+        let msgReq = {  
             Method: "POST",  
             URL: "friend/accept",
             Authorization: sessionStorage.getItem('authentication'),
@@ -415,12 +406,12 @@ class MainPage extends Component {
                 id: target,
             }
         }; 
-        this.socket.send(JSON.stringify(msgAccept));
+        this.socket.send(JSON.stringify(msgReq));
     };
     
     handleRequest = target => {
         // api post request add friend
-        let msgAccept = {  
+        let msgReq = {  
             Method: "POST",  
             URL: "friend/add",
             Authorization: sessionStorage.getItem('authentication'),
@@ -428,17 +419,17 @@ class MainPage extends Component {
                 id: target,
             }
         }; 
-        this.socket.send(JSON.stringify(msgAccept));
+        this.socket.send(JSON.stringify(msgReq));
     };
     
     initChatBox = friend => {
         // api fetch messages
-        let msgAccept = {  
+        let msgReq = {  
             Method: "GET",  
             URL: "chat/" + friend.id,
             Authorization: sessionStorage.getItem('authentication'),
         }; 
-        this.socket.send(JSON.stringify(msgAccept));
+        this.socket.send(JSON.stringify(msgReq));
         this.setState({textingFriend: friend});
     }
 
@@ -447,13 +438,16 @@ class MainPage extends Component {
         this.setState({
             [name] : value
         });
+        if(name == "inputMessage" && value === "") {
+            this.sendStopTyping();
+        }
     }
     
     flagIsTyping = false;
-    // send message
     handleKeyPress = (e) => {
         if(e.key === "Enter" && this.state.inputMessage !== "") {
-            let msgAccept = {  
+            // api send message
+            let msgReq = {  
                 Method: "POST",  
                 URL: "chat/send",
                 Authorization: sessionStorage.getItem('authentication'),
@@ -472,12 +466,14 @@ class MainPage extends Component {
                 date: convertTimestampToDate(getCurrentTimestamp()),
                 message: this.state.inputMessage,
             }
-            this.socket.send(JSON.stringify(msgAccept));
+            this.socket.send(JSON.stringify(msgReq));
             this.setState({inputMessage: "", messageData: [...this.state.messageData, msg]});
-            this.sendStopTyping();
+            //this.sendStopTyping();
         }
-        if(!this.state.flagIsTyping && this.state.inputMessage !== "") {
-            let msgAccept = {  
+        
+        if(!this.state.flagIsTyping) {
+            // api send is typing
+            let msgReq = {  
                 Method: "POST",  
                 URL: "chat/istyping",
                 Authorization: sessionStorage.getItem('authentication'),
@@ -486,14 +482,15 @@ class MainPage extends Component {
                     type: true,
                 }
             }; 
-            console.log(JSON.stringify(msgAccept));
-            this.socket.send(JSON.stringify(msgAccept));
+            console.log(JSON.stringify(msgReq));
+            this.socket.send(JSON.stringify(msgReq));
             this.setState({flagIsTyping: true});
         }
     }
     
     sendStopTyping = () => {
-        let msgAccept = {  
+        // api send stop typing
+        let msgReq = {  
             Method: "POST",  
             URL: "chat/istyping",
             Authorization: sessionStorage.getItem('authentication'),
@@ -502,11 +499,12 @@ class MainPage extends Component {
                 type: false,
             }
         }; 
-        console.log(JSON.stringify(msgAccept));
-        this.socket.send(JSON.stringify(msgAccept));
+        console.log(JSON.stringify(msgReq));
+        this.socket.send(JSON.stringify(msgReq));
         this.setState({flagIsTyping: false});
     }
     
+    // _render
     render() {
         return (
             <div className="ui grid">
