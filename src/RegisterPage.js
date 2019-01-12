@@ -18,25 +18,28 @@ class Register extends Component {
     }
     handleSubmit = () => {
         const {username, password} = this.state;
-        const socket = this.props.socket;  
-        console.log(socket);
-        const history = this.props.history;
+        const {socket, history, setUser} = this.props;
         var msg = {  
             Method: "POST",  
             URL: "users/signup",
             DATA: {
                 username: username,
                 password: password,
-                dateofbirth: 12
             }  
         }; 
         socket.send(JSON.stringify(msg));
         socket.onmessage = function(event) {
-            //var message = event.data;
-            console.log(event.data);
-            sessionStorage.setItem('authentication', event.data);
-            history.push("/");
-            console.log(socket);
+            let data = event.data;
+            let obj = JSON.parse(data);
+            if (obj.status === 200) {
+                sessionStorage.setItem('authentication', obj.data.token);
+                sessionStorage.setItem('user', JSON.stringify(obj.data.user));
+                setUser(obj.data.user);
+                history.push("/");
+            }
+            else {
+                alert(obj.message);
+            }
         };
     }
     render() {
@@ -58,7 +61,7 @@ class Register extends Component {
                    
                    
                     <input 
-                        placeHolder="Username"
+                        placeholder="Username"
                         type="text" 
                         name="username" 
                         value={username} 
@@ -72,7 +75,7 @@ class Register extends Component {
                         <i className="lock icon"></i>
                    
                     <input 
-                        placeHolder="Password"
+                        placeholder="Password"
                         type="password" 
                         name="password" 
                         value={password} 
@@ -84,7 +87,7 @@ class Register extends Component {
                     
                     <input className="ui fluid large teal submit button"
                         type="button" 
-                        value="Submit" 
+                        value="Register" 
                         onClick={this.handleSubmit} />
                   </div>      
                 </form>

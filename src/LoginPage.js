@@ -34,13 +34,14 @@ class Login extends Component {
             let data = event.data;
             let obj = JSON.parse(data);
             // ============ DEBUG ===============
-            sessionStorage.setItem('authentication', data);
-            let user = {
-                username: "me", 
-            }
-            sessionStorage.setItem('user', JSON.stringify(user));
-            history.push("/");
+            // sessionStorage.setItem('authentication', data);
+            // let user = {
+            //     username: "me", 
+            // }
+            // sessionStorage.setItem('user', JSON.stringify(user));
+            // history.push("/");
             // ==================================
+            console.log(obj)
             if (obj.status === 200) {
                 sessionStorage.setItem('authentication', obj.data.token);
                 sessionStorage.setItem('user', JSON.stringify(obj.data.user));
@@ -48,7 +49,7 @@ class Login extends Component {
                 history.push("/");
             }
             else {
-                // handle fail
+                alert(obj.message);
             }
         };
     }
@@ -70,7 +71,7 @@ class Login extends Component {
                         <i className="user icon"></i>
                    
                     <input 
-                        placeHolder="Username"
+                        placeholder="Username"
                         type="text" 
                         name="username" 
                         value={username} 
@@ -84,7 +85,7 @@ class Login extends Component {
                         <i className="lock icon"></i>
                    
                     <input 
-                        placeHolder="Password"
+                        placeholder="Password"
                         type="password" 
                         name="password" 
                         value={password} 

@@ -5,8 +5,9 @@ import LoginPage from './LoginPage';
 import RegisterPage from './RegisterPage';
 
 
-const address = 'wss://myprojectsocket.serveo.net:65432';
+//const address = 'wss://myprojectsocket.serveo.net:65432';
 //const address = 'ws://localhost:8000';
+const address = 'ws://172.16.7.186:65432';
 
 class App extends Component {
     constructor(props) {

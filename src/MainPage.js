@@ -1,5 +1,7 @@
 import React, {Component} from 'react';
 import {withRouter} from 'react-router-dom';
+import coco from'./coco.jpg';
+
 
 const ChatBox = props => {
     return (
@@ -49,23 +51,29 @@ const FriendsList = props => {
       <div className="ui segment ">
         <div id="inputFriendsList" className="ui icon input">
           <i className="search icon"></i>
-          <input type="text" placeholder="Search..." />
+          <input type="text" placeholder="Search a person..." 
+                    onChange={(e) => props.handleChangeSearch(e)} 
+                    name="inputSearch"
+                    value={props.inputSearch}
+          />
         </div>
         <h3>Friends</h3>
         <div id="knownFriends" className="ui middle aligned animated list">
             {
                 props.knownFriends.map((friendItem, i) => {
-                    return (
-                        <div className="item" key={i}>
-                          <div className="right floated content">
-                            {friendItem.isOnline == 1 && <div className="dot"></div>}
-                          </div>
-                          <img className="ui avatar image" src="https://api.adorable.io/avatars/285/asiojdioasd" />
-                          <div className="content">
-                            <a className="header" onClick={() => props.initChatBox(friendItem)}>{friendItem.username}</a>
-                          </div>
-                        </div>
-                    )
+                    if(friendItem.username.includes(props.inputSearch)) {
+                        return (
+                            <div className="item" key={i}>
+                              <div className="right floated content">
+                                {friendItem.isOnline == 1 && <div className="dot"></div>}
+                              </div>
+                              <img className="ui avatar image" src="https://api.adorable.io/avatars/285/asiojdioasd" />
+                              <div className="content">
+                                <a className="header" onClick={() => props.initChatBox(friendItem)}>{friendItem.username}</a>
+                              </div>
+                            </div>
+                        )
+                    }
                 })
             }
         </div>
@@ -73,32 +81,36 @@ const FriendsList = props => {
         <div id="strangers" className="ui middle aligned list">
             {
                 props.requestedFriends.map((friendItem, i) => {
-                    return (
-                        <div className="item" key={i}>
-                          <div className="right floated content">
-                            {friendItem.status === "request" && <button className="ui disabled button">Requested</button>}
-                            {friendItem.status === "accept" && <button className="ui positive basic button" onClick={() => props.handleAccept(friendItem.id)}>Accept</button>}
-                          </div>
-                          <img className="ui avatar image" src="https://api.adorable.io/avatars/285/asiojdioasd" />
-                          <div className="content">
-                            <a className="header">{friendItem.username}</a>
-                          </div>
-                        </div>
-                    )
+                    if(friendItem.username.includes(props.inputSearch)) {
+                        return (
+                            <div className="item" key={i}>
+                              <div className="right floated content">
+                                {friendItem.status === "request" && <button className="ui disabled button">Requested</button>}
+                                {friendItem.status === "accept" && <button className="ui positive basic button" onClick={() => props.handleAccept(friendItem.id)}>Accept</button>}
+                              </div>
+                              <img className="ui avatar image" src="https://api.adorable.io/avatars/285/asiojdioasd" />
+                              <div className="content">
+                                <a className="header">{friendItem.username}</a>
+                              </div>
+                            </div>
+                        )
+                    }
                 })
             }{
                 props.potentialFriends.map((friendItem, i) => {
-                    return (
-                        <div className="item" key={i}>
-                          <div className="right floated content">
-                            <button className="ui basic button" onClick={() => props.handleRequest(friendItem.id)}> <i className="icon user" />Add</button>
-                          </div>
-                          <img className="ui avatar image" src="https://api.adorable.io/avatars/285/asiojdioasd" />
-                          <div className="content">
-                            <a className="header">{friendItem.username}</a>
-                          </div>
-                        </div>
-                    )
+                    if(friendItem.username.includes(props.inputSearch)) {
+                        return (
+                            <div className="item" key={i}>
+                              <div className="right floated content">
+                                <button className="ui basic button" onClick={() => props.handleRequest(friendItem.id)}> <i className="icon user" />Add</button>
+                              </div>
+                              <img className="ui avatar image" src="https://api.adorable.io/avatars/285/asiojdioasd" />
+                              <div className="content">
+                                <a className="header">{friendItem.username}</a>
+                              </div>
+                            </div>
+                        )
+                    }
                 })
             }
         </div>
@@ -162,6 +174,7 @@ const NewsFeed = props => {
 };
 
 const Profile = props => {
+    let tmpAvatar = props.modalData.avatar ? props.modalData.avatar : ("https://api.adorable.io/avatars/285/" + props.modalData.username);
     return (
         <div className="ui modal">
           <i className="close icon"></i>
@@ -170,20 +183,21 @@ const Profile = props => {
           </div>
           <div className="image content">
             <div className="ui medium image">
-              <img src={"https://api.adorable.io/avatars/285/" + props.modalData.username} />
+              <img src={tmpAvatar} />
             </div>
             <div className="description">
               <div className="ui header">{props.modalData.username}</div>
               <p>yêu màu tím , thích màu hồng, sống nội tâm, hay khóc thầm,ghét sự giả dối...đặc biệt rất thích ăn rau dền...</p>
             </div>
           </div>
+          
+          <input type="file" id="my_file" />
+          <button onClick={() => props.handleUploadImage()}>Yes</button>
           <div className="actions">
             <div className="ui black deny button">
               Nope
             </div>
-            <div className="ui positive right labeled icon button">
-              Add friend
-              <i className="checkmark icon"></i>
+            <div className="ui positive right labeled icon button">Follow me<i className="checkmark icon"></i>
             </div>
           </div>
         </div>
@@ -197,22 +211,42 @@ class MainPage extends Component {
         this.state = {
             messageData: [
                 {
-                    username: "Invoker",
-                    avatar: "https://api.adorable.io/avatars/285/Invoker",
-                    date: "123:123 AM",
-                    message: "this is a test",
+                    username: "Chatbox",
+                    avatar: "https://api.adorable.io/avatars/285/Chatbox",
+                    date: "69:69 AM",
+                    message: "Welcome our socket application",
                 },
                 {
-                    username: "Invoker",
-                    avatar: "https://api.adorable.io/avatars/285/Invoker",
-                    date: "123:123 AM",
-                    message: "this is the second test",
+                    username: "Chatbox",
+                    avatar: "https://api.adorable.io/avatars/285/Chatbox",
+                    date: "69:69 AM",
+                    message: "Team members",
+                },
+                {
+                    username: "Chatbox",
+                    avatar: "https://api.adorable.io/avatars/285/Chatbox",
+                    date: "69:69 AM",
+                    message: "1551026_Vu~ Hoang` Qua^n",
+                },
+                {
+                    username: "Chatbox",
+                    avatar: "https://api.adorable.io/avatars/285/Chatbox",
+                    date: "69:69 AM",
+                    message: "Huynh` Vinh~ Lo^c.",
+                },
+                {
+                    username: "Chatbox",
+                    avatar: "https://api.adorable.io/avatars/285/Chatbox",
+                    date: "69:69 AM",
+                    message: "NKT",
                 },
             ],
             textingFriend: "",
             inputMessage: "",
             isTyping: false,
+            inputSearch: "",
             postMessage: "",
+            query:"",
             knownFriends: [
                 {
                     username: "Windrunner",
@@ -279,8 +313,9 @@ class MainPage extends Component {
             if (typeof callback !== 'undefined') {
                 callback();
             }
-        }, 500);
+        }, 100);
     };
+    
     waitForConnection = function (callback, interval) {
         if (this.socket.readyState === 1) {
             callback();
@@ -344,19 +379,19 @@ class MainPage extends Component {
             // get friend list
             if(obj.status === 200 && obj.method === 'GET' && obj.url === 'friend') { 
                 this.setState({
-                  knownFriends: [...this.state.knownFriends, ...obj.data]  
+                  knownFriends: obj.data  
                 });
             }
             // get unknown people
             else if(obj.status === 200 && obj.method === 'GET' && obj.url === 'friend?isrequested=2') {
                 this.setState({
-                  potentialFriends: [...this.state.potentialFriends, ...obj.data]  
+                  potentialFriends: obj.data
                 });
             }
             // get requested people
             else if(obj.status === 200 && obj.method === 'GET' && obj.url === 'friend?isrequested=1') {
                 this.setState({
-                  requestedFriends: [...this.state.requestedFriends, ...obj.data]  
+                  requestedFriends: obj.data
                 });
             }
             // accept friend request
@@ -637,6 +672,23 @@ class MainPage extends Component {
         this.setState({flagIsTyping: false});
     }
     
+    
+    handleChangeSearch = (e) => {
+        const {name, value} = e.target;
+        this.setState({
+            [name] : value
+        });
+    }
+    
+    handleUploadImage = (e) => {
+        console.log("asdsadasdsa   image")
+        let modalItem = this.state.modalData;
+        modalItem.avatar = coco;
+        console.log(modalItem);
+        this.setState({modalData: modalItem});
+        console.log(this.state.modalData)
+    }
+    
     // _render
     render() {
         return (
@@ -650,6 +702,8 @@ class MainPage extends Component {
                         handleAccept={this.handleAccept}
                         handleRequest={this.handleRequest}
                         initChatBox={this.initChatBox}
+                        handleChangeSearch={this.handleChangeSearch}
+                        inputSearch={this.state.inputSearch}
                     />
                 </div>
                 <div className="six wide column">          
@@ -675,6 +729,7 @@ class MainPage extends Component {
                 </div>
                 <Profile 
                     modalData={this.state.modalData} 
+                    handleUploadImage={this.handleUploadImage}
                 />
             </div>   
         );
