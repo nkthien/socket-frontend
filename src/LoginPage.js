@@ -55,29 +55,62 @@ class Login extends Component {
     render() {
         const {username, password, loginFailed} = this.state;
         return (
-            <div>
-                <h1>Login</h1>
-                <form>
-                    <label>Username</label>
+        
+        <div className="ui middle aligned center aligned grid" style={{height: "100%"}}>
+            <div className="column" style={{width: "500px"}}>
+                <h1 className="ui teal image header">
+                  <div className="content">
+                    Log-in to your account
+                  </div>
+                </h1>
+                <form className="ui large form">
+                  <div className="ui stacked segment">
+                    <div className="field">
+                      <div className="ui left icon input">
+                        <i className="user icon"></i>
+                   
                     <input 
+                        placeHolder="Username"
                         type="text" 
                         name="username" 
                         value={username} 
                         onChange={this.handleChange} />
-                    <label>Password</label>
+                        
+                      </div>
+                    </div>
+                    
+                    <div className="field">
+                      <div className="ui left icon input">
+                        <i className="lock icon"></i>
+                   
                     <input 
-                        type="text" 
+                        placeHolder="Password"
+                        type="password" 
                         name="password" 
                         value={password} 
-                        onChange={this.handleChange}/>
-                    <input 
+                        onChange={this.handleChange} />
+                        
+                      </div>
+                    </div>
+                    
+                    
+                    
+                    
+                    
+                    <input className="ui fluid large teal submit button"
                         type="button" 
                         value="Submit" 
                         onClick={this.handleSubmit} />
+                        
+                    {true && <div className="ui error message"><h3>Login not successful, please try again!</h3></div>} 
+                        
+                   </div>
                 </form>
-                {loginFailed && <h3>Login not successful, please try again</h3>}
-                <Link to='/register'>Don't have account? Create one!</Link>
+                <div className="ui message">
+                  <Link to='/register'>Don't have account? Create one!</Link>
+                </div>
             </div>
+        </div>  
         );
     }
 }

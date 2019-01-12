@@ -42,28 +42,57 @@ class Register extends Component {
     render() {
         const {username, password} = this.state;
         return (
-            <div>
-                <h1>Register</h1>
-                <form>
-                    <label>Username</label>
+            <div className="ui middle aligned center aligned grid" style={{height: "100%"}}>
+            <div className="column" style={{width: "500px"}}>
+                <h1 className="ui teal image header">
+                  <div className="content">
+                    Create new account
+                  </div>
+                </h1>
+                <form className="ui large form">
+                  <div className="ui stacked segment">
+                    <div className="field">
+                      <div className="ui left icon input">
+                        <i className="user icon"></i>
+                   
+                   
+                   
                     <input 
+                        placeHolder="Username"
                         type="text" 
                         name="username" 
                         value={username} 
                         onChange={this.handleChange} />
-                    <label>Password</label>
+                       
+                      </div>
+                    </div>
+                    
+                    <div className="field">
+                      <div className="ui left icon input">
+                        <i className="lock icon"></i>
+                   
                     <input 
-                        type="text" 
+                        placeHolder="Password"
+                        type="password" 
                         name="password" 
                         value={password} 
                         onChange={this.handleChange}/>
-                    <input 
+                         
+                      </div>
+                    </div>
+      
+                    
+                    <input className="ui fluid large teal submit button"
                         type="button" 
                         value="Submit" 
                         onClick={this.handleSubmit} />
+                  </div>      
                 </form>
-                <Link to='/login'>Back to login!</Link>
+                <div className="ui message">
+                  <Link to='/login'>Already have account? Back to login!</Link>
+                </div>
             </div>
+        </div>
         );
     }
 }
